@@ -1,0 +1,251 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <algorithm>
+#include <stdexcept>
+
+using namespace std;
+
+vector<vector<int>> generateKeyMatrix();
+string matrixToKey(const vector<vector<int>>& keyMatrix);
+vector<int> processMessage(const string& message);
+vector<int> encrypt(const vector<int>& numbers, const vector<vector<int>>& keyMatrix);
+vector<int> decrypt(const vector<int>& numbers, const vector<vector<int>>& invMatrix);
+string numbersToText(const vector<int>& numbers);
+vector<vector<int>> keyToMatrix(const string& key);
+int modInverse(int a, int m);
+vector<vector<int>> inverseMatrix(const vector<vector<int>>& keyMatrix);
+int gcd(int a, int b);
+
+int main() {
+    srand(time(0)); // Seed random number generator
+
+    int choice;
+    do {
+        cout << "Hill Cipher System sa mga gwapo\n";
+        cout << "1. Encrypt\n";
+        cout << "2. Decrypt\n";
+        cout << "3. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+        cin.ignore(); // Ignore newline left in buffer
+
+        if (choice == 1) {
+            // Encryption
+            vector<vector<int>> keyMatrix = generateKeyMatrix();
+            string key = matrixToKey(keyMatrix);
+            cout << "Generated Key: " << key << endl;
+
+            string message;
+            cout << "Enter message to encrypt: ";
+            getline(cin, message);
+
+            vector<int> numbers = processMessage(message);
+            vector<int> encryptedNumbers = encrypt(numbers, keyMatrix);
+            string ciphertext = numbersToText(encryptedNumbers);
+
+            cout << "Encrypted message: " << ciphertext << endl;
+            cout << "Please save the key for decryption: " << key << endl << endl;
+
+        } else if (choice == 2) {
+            // Decryption
+            string ciphertext;
+            cout << "Enter encrypted message: ";
+            getline(cin, ciphertext);
+
+            string keyStr;
+            cout << "Enter the encryption key (4 letters A-I): ";
+            getline(cin, keyStr);
+
+            // Convert key string to matrix
+            vector<vector<int>> keyMatrix;
+            try {
+                keyMatrix = keyToMatrix(keyStr);
+            } catch (const invalid_argument& e) {
+                cout << "Error: " << e.what() << endl;
+                continue;
+            }
+
+            // Check if key is valid (determinant coprime with 27)
+            int a = keyMatrix[0][0];
+            int b = keyMatrix[0][1];
+            int c = keyMatrix[1][0];
+            int d = keyMatrix[1][1];
+            int det = (a * d - b * c) % 27;
+            det = (det + 27) % 27; // Ensure positive
+            if (det == 0 || gcd(det, 27) != 1) {
+                cout << "Invalid key: determinant is not invertible modulo 27." << endl;
+                continue;
+            }
+
+            // Compute inverse matrix
+            vector<vector<int>> invMatrix;
+            try {
+                invMatrix = inverseMatrix(keyMatrix);
+            } catch (const invalid_argument& e) {
+                cout << "Error: " << e.what() << endl;
+                continue;
+            }
+
+            vector<int> numbers = processMessage(ciphertext);
+            vector<int> decryptedNumbers = decrypt(numbers, invMatrix);
+            string plaintext = numbersToText(decryptedNumbers);
+
+            cout << "Decrypted message: " << plaintext << endl << endl;
+
+        } else if (choice != 3) {
+            cout << "Invalid choice. Please try again.\n";
+        }
+
+    } while (choice != 3);
+
+    return 0;
+}
+
+vector<vector<int>> generateKeyMatrix() {
+    int a, b, c, d, det;
+    do {
+        a = rand() % 9 + 1;
+        b = rand() % 9 + 1;
+        c = rand() % 9 + 1;
+        d = rand() % 9 + 1;
+        det = a * d - b * c;
+    } while (det % 3 == 0); // Ensure determinant is coprime with 27
+    return { {a, b}, {c, d} };
+}
+
+string matrixToKey(const vector<vector<int>>& keyMatrix) {
+    string key;
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 2; ++j) {
+            key += 'A' + (keyMatrix[i][j] - 1);
+        }
+    }
+    return key;
+}
+
+vector<int> processMessage(const string& message) {
+    vector<int> numbers;
+    for (char c : message) {
+        if (c == ' ') {
+            numbers.push_back(0);
+        } else if (isalpha(c)) {
+            numbers.push_back(toupper(c) - 'A' + 1);
+        }
+    }
+    if (numbers.size() % 2 != 0) {
+        numbers.push_back(0);
+    }
+    return numbers;
+}
+
+vector<int> encrypt(const vector<int>& numbers, const vector<vector<int>>& keyMatrix) {
+    vector<int> encrypted;
+    int a = keyMatrix[0][0];
+    int b = keyMatrix[0][1];
+    int c = keyMatrix[1][0];
+    int d = keyMatrix[1][1];
+    for (size_t i = 0; i < numbers.size(); i += 2) {
+        int x = numbers[i];
+        int y = numbers[i + 1];
+        int ex = (x * a + y * c) % 27;
+        int ey = (x * b + y * d) % 27;
+        ex = (ex + 27) % 27;
+        ey = (ey + 27) % 27;
+        encrypted.push_back(ex);
+        encrypted.push_back(ey);
+    }
+    return encrypted;
+}
+
+vector<int> decrypt(const vector<int>& numbers, const vector<vector<int>>& invMatrix) {
+    vector<int> decrypted;
+    int a = invMatrix[0][0];
+    int b = invMatrix[0][1];
+    int c = invMatrix[1][0];
+    int d = invMatrix[1][1];
+    for (size_t i = 0; i < numbers.size(); i += 2) {
+        int x = numbers[i];
+        int y = numbers[i + 1];
+        int dx = (x * a + y * c) % 27;
+        int dy = (x * b + y * d) % 27;
+        dx = (dx + 27) % 27;
+        dy = (dy + 27) % 27;
+        decrypted.push_back(dx);
+        decrypted.push_back(dy);
+    }
+    return decrypted;
+}
+
+string numbersToText(const vector<int>& numbers) {
+    string text;
+    for (int num : numbers) {
+        text += (num == 0) ? ' ' : ('A' + num - 1);
+    }
+    return text;
+}
+
+vector<vector<int>> keyToMatrix(const string& key) {
+    if (key.length() != 4) {
+        throw invalid_argument("Key must be 4 characters long.");
+    }
+    vector<vector<int>> matrix(2, vector<int>(2));
+    for (size_t i = 0; i < 4; ++i) {
+        char c = toupper(key[i]);
+        if (c < 'A' || c > 'I') {
+            throw invalid_argument("Key characters must be A-I.");
+        }
+        int num = c - 'A' + 1;
+        matrix[i / 2][i % 2] = num;
+    }
+    return matrix;
+}
+
+int modInverse(int a, int m) {
+    int m0 = m, y = 0, x = 1;
+    if (m == 1) return 0;
+    while (a > 1) {
+        int q = a / m;
+        int t = m;
+        m = a % m;
+        a = t;
+        t = y;
+        y = x - q * y;
+        x = t;
+    }
+    if (x < 0) x += m0;
+    return x;
+}
+
+vector<vector<int>> inverseMatrix(const vector<vector<int>>& keyMatrix) {
+    int a = keyMatrix[0][0];
+    int b = keyMatrix[0][1];
+    int c = keyMatrix[1][0];
+    int d = keyMatrix[1][1];
+    int det = (a * d - b * c) % 27;
+    det = (det + 27) % 27;
+    if (det == 0 || gcd(det, 27) != 1) {
+        throw invalid_argument("Matrix is not invertible.");
+    }
+    int invDet = modInverse(det, 27);
+    int invA = (d * invDet) % 27;
+    int invB = ((-b) * invDet) % 27;
+    int invC = ((-c) * invDet) % 27;
+    int invD = (a * invDet) % 27;
+    invA = (invA + 27) % 27;
+    invB = (invB + 27) % 27;
+    invC = (invC + 27) % 27;
+    invD = (invD + 27) % 27;
+    return { {invA, invB}, {invC, invD} };
+}
+
+int gcd(int a, int b) {
+    while (b) {
+        int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
