@@ -1,76 +1,33 @@
 #include <iostream>
-#include <cstring>
-#include "main.cpp"
+#include <string>
 
 using namespace std;
 
-// Fixed 2x2 encryption key matrix
-const int KEY[2][2] = {{3, 2}, {1, 2}};
-
-// Fixed inverse key (precomputed for simplicity)
-const int INV_KEY[2][2] = {{2, -2}, {-1, 3}};
-
-// Function to encrypt a message
 void encrypt() {
-    char message[100];
+    string message;
     
-    cout << "Enter message (max 100 characters): ";
+    cout << "Enter a message to encrypt";
     cin.ignore();
-    cin.getline(message, 100);
+    getline(cin, message);
 
-    int length = strlen(message);
-    
-    // Ensure even length by padding with a space
-    if (length % 2 != 0) {
-        strcat(message, " ");
-        length++;
+    string encryptedMessage = "";
+    for (char c : message) {
+        if (c == ' ') { //if ang character is blank/space himuon natog 0
+            encryptedMessage += "0";
+        } else if (isalpha(c)) {
+            char uppercase = toupper(c);
+            encryptedMessage += to_string(uppercase - 'A' + 1); //A ASCII = 65, so to reset to 0, message - (65), + 1 dayun to increment so like 1 = A, 2 = B and so on
+        }
     }
 
-    // Convert characters to ASCII values and store in a matrix
-    int matrix[50][2]; // Supports up to 100 chars (50x2)
-    for (int i = 0, k = 0; i < length; i += 2, k++) {
-        matrix[k][0] = message[i];
-        matrix[k][1] = message[i + 1];
+    if (encryptedMessage.length() % 2 != 0) { //if odd ang number of numbers, add lang 0 sa last para ma pair nato sila by 2 later
+        encryptedMessage += "0";
     }
 
-    // Encrypt the matrix using matrix multiplication
-    int encryptedMatrix[50][2];
-    for (int i = 0; i < length / 2; i++) {
-        encryptedMatrix[i][0] = (KEY[0][0] * matrix[i][0] + KEY[0][1] * matrix[i][1]);
-        encryptedMatrix[i][1] = (KEY[1][0] * matrix[i][0] + KEY[1][1] * matrix[i][1]);
-    }
-
-    // Display encrypted message as numerical values
-    cout << "Encrypted message (numerical values): ";
-    for (int i = 0; i < length / 2; i++) {
-        cout << encryptedMatrix[i][0] << " " << encryptedMatrix[i][1] << " ";
-    }
-    cout << endl;
+    cout << "Encrypted message: " << encryptedMessage << endl; // dili pa final since e x pa nato sa atong key matrix
 }
 
-// Function to decrypt a message
-void decrypt() {
-    int length;
-    cout << "Enter number of encrypted values: ";
-    cin >> length;
-
-    int encryptedMatrix[50][2];
-    cout << "Enter encrypted values: ";
-    for (int i = 0; i < length / 2; i++) {
-        cin >> encryptedMatrix[i][0] >> encryptedMatrix[i][1];
-    }
-
-    // Decrypt using the inverse key matrix
-    char decryptedMessage[100];
-    for (int i = 0; i < length / 2; i++) {
-        int char1 = (INV_KEY[0][0] * encryptedMatrix[i][0] + INV_KEY[0][1] * encryptedMatrix[i][1]);
-        int char2 = (INV_KEY[1][0] * encryptedMatrix[i][0] + INV_KEY[1][1] * encryptedMatrix[i][1]);
-        
-        decryptedMessage[i * 2] = char1;
-        decryptedMessage[i * 2 + 1] = char2;
-    }
-    
-    decryptedMessage[length] = '\0'; // Null-terminate the string
-    
-    cout << "Decrypted message: " << decryptedMessage << endl;
+int main() {
+    encrypt();
+    return 0;
 }

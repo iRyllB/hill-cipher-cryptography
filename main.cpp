@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "encryption.cpp"
 using namespace std;
 
@@ -38,8 +39,7 @@ int main() {
 }
 
 void encrypt() {
-    cout << "Encryption process (to be implemented)\n";
-    // Implement encryption logic here
+    cout << "Encryption process";
 }
 
 void decrypt() {
