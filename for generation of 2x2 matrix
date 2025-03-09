@@ -1,0 +1,15 @@
+vector<vector<int>> generateKeyMatrix() {
+    int a, b, c, d, det;
+    while (true) {
+        a = rand() % 9 + 1;  
+        b = rand() % 9 + 1;
+        c = rand() % 9 + 1;
+        d = rand() % 9 + 1;
+        det = a * d - b * c; 
+        
+        if (det % 3 != 0) { 
+            break; 
+        }
+    }
+    return {{a, b}, {c, d}};
+}
