@@ -1,7 +1,5 @@
 #include <iostream>
 #include <string>
-#include <cstdlib>
-#include <ctime>
 using namespace std;
 
 //gcd calculator (greatest common divisor)
@@ -15,7 +13,7 @@ int gcd(int a, int b) {
 }
 
 //generate random matrix key
-void generateKeyMatrix(int keyMatrix[2][2]) {
+int generateKeyMatrix(int keyMatrix[2][2]) {
     srand(time(0));
     int a, b, c, d, det;
 
@@ -34,6 +32,8 @@ void generateKeyMatrix(int keyMatrix[2][2]) {
 
     cout << "Please use this key when decrypting: \n";
     cout << "Generated Key: " << a << b << c << d << endl;
+
+    return det;
 }
 
 // Multiplication for matrix
@@ -87,8 +87,17 @@ string encrypt() {
 }
 
 // Placeholder function for decryption
-void decrypt() {
-    cout << "Decryption logic goes here\n";
+string decrypt() {
+    string message_d;
+    int keyDecryption;
+    
+    cout << "Enter the decrypted message: ";
+    getline(cin, message_d);
+
+    cout << "Enter the 4 digit key to decrypt: ";
+    cin >> keyDecryption;
+    ///call dayun for decryption
+    return 0;
 }
 
 // Main menu system

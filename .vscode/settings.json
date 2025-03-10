@@ -5,6 +5,7 @@
         "string": "cpp",
         "xlocale": "cpp",
         "hinimos ai": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "stdexcept": "cpp"
     }
 }
