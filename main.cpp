@@ -1,8 +1,10 @@
 #include <iostream>
 #include <string>
+#include <ctime>
+
 using namespace std;
 
-//gcd calculator (greatest common divisor)
+// GCD calculator (Greatest Common Divisor)
 int gcd(int a, int b) {
     while (b != 0) {
         int temp = b;
@@ -12,7 +14,7 @@ int gcd(int a, int b) {
     return a;
 }
 
-//generate random matrix key
+// Generate random matrix key
 int generateKeyMatrix(int keyMatrix[2][2]) {
     srand(time(0));
     int a, b, c, d, det;
@@ -23,15 +25,17 @@ int generateKeyMatrix(int keyMatrix[2][2]) {
         c = rand() % 9 + 1;
         d = rand() % 9 + 1;
         det = (a * d - b * c);
-    } while (gcd(det, 26) != 1);  //check if invertible
+    } while (gcd(det, 26) != 1);  // Check if invertible
 
     keyMatrix[0][0] = a;
     keyMatrix[0][1] = b;
     keyMatrix[1][0] = c;
     keyMatrix[1][1] = d;
 
-    cout << "Please use this key when decrypting: \n";
-    cout << "Generated Key: " << a << b << c << d << endl;
+    cout << "\n-----------------------------------\n";
+    cout << " Please use this key when decrypting:\n";
+    cout << " Generated Key: " << a << b << c << d << endl;
+    cout << "-----------------------------------\n";
 
     return det;
 }
@@ -48,7 +52,7 @@ string multiplication(string encrypted_message, int keyMatrix[2][2]) {
         int result1 = num1 * keyMatrix[0][0] + num2 * keyMatrix[1][0];
         int result2 = num1 * keyMatrix[0][1] + num2 * keyMatrix[1][1];
 
-        //convert to string
+        // Convert to string
         result += to_string(result1) + " " + to_string(result2) + " ";
     }
 
@@ -60,7 +64,7 @@ string encrypt() {
     string message;
     int keyMatrix[2][2];
 
-    cout << "Enter a message to encrypt: ";
+    cout << "\n Enter a message to encrypt: ";
     getline(cin, message);
 
     generateKeyMatrix(keyMatrix);  // Generate key matrix
@@ -68,21 +72,24 @@ string encrypt() {
     string encrypted_message = "";
     for (char c : message) {
         if (c == ' ') {
-            encrypted_message += "0"; //convert blank/spaces to 0
+            encrypted_message += "0"; // Convert blank/spaces to 0
         } else if (isalpha(c)) {
             char uppercase = toupper(c);
             encrypted_message += to_string(uppercase - 'A' + 1);
         }
     }
 
-    // add 0 if uneven
+    // Add 0 if uneven
     if (encrypted_message.length() % 2 != 0) {
         encrypted_message += "0";
     }
 
     string encrypted_output = multiplication(encrypted_message, keyMatrix);
 
-    cout << "Encrypted Message: " << encrypted_output << endl;
+    cout << "\n-----------------------------------\n";
+    cout << " Encrypted Message: " << encrypted_output << endl;
+    cout << "-----------------------------------\n";
+
     return encrypted_output;
 }
 
@@ -90,13 +97,15 @@ string encrypt() {
 string decrypt() {
     string message_d;
     int keyDecryption;
-    
-    cout << "Enter the decrypted message: ";
+
+    cout << "\n Enter the encrypted message: ";
     getline(cin, message_d);
 
-    cout << "Enter the 4 digit key to decrypt: ";
+    cout << "\n Enter the 4-digit key to decrypt: ";
     cin >> keyDecryption;
-    ///call dayun for decryption
+
+    // Decryption logic here...
+
     return 0;
 }
 
@@ -105,33 +114,29 @@ int main() {
     int choice;
 
     do {
-        cout << "\nMatrix Encryption System\n";
-        cout << "1. Encrypt Message\n";
-        cout << "2. Decrypt Message\n";
-        cout << "3. Exit\n";
-        cout << "Enter your choice: ";
+        cout << "\n===================================\n";
+        cout << "      Matrix Encryption System     \n";
+        cout << "===================================\n";
+        cout << " 1. Encrypt Message\n";
+        cout << " 2. Decrypt Message\n";
+        cout << " 3. Exit\n";
+        cout << "-----------------------------------\n";
+        cout << " Enter your choice: ";
 
         if (!(cin >> choice)) {
             cin.clear();
             cin.ignore(1000, '\n');
-            cout << "Invalid input! Please enter a number.\n";
+            cout << "\n Invalid input! Please enter a number.\n";
             continue;
         }
 
         cin.ignore();
 
         switch (choice) {
-            case 1:
-                encrypt();
-                break;
-            case 2:
-                decrypt();
-                break;
-            case 3:
-                cout << "Exiting program...\n";
-                break;
-            default:
-                cout << "Invalid choice! Please enter a valid option.\n";
+            case 1: encrypt(); break;
+            case 2: decrypt(); break;
+            case 3: cout << "\n Exiting program...\n"; break;
+            default: cout << "\n Invalid choice! Please enter a valid option.\n";
         }
     } while (choice != 3);
 
