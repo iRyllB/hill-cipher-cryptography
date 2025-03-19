@@ -13,6 +13,58 @@ int gcd(int a, int b) {
     }
     return a;
 }
+int modInverse(int a) {
+    a = a % 26;
+    for (int x = 1; x < 26; x++) {
+        if ((a * x) % 26 == 1)
+            return x;
+    }
+    return -1; // No modular inverse exists
+}
+
+// Function to find the inverse of a 2x2 matrix in mod 26
+bool inverseMatrix(int A[2][2], int result[2][2]) {
+    int det = (A[0][0] * A[1][1] - A[0][1] * A[1][0]) % 26;
+    if (det < 0) det += 26;
+    int detInv = modInverse(det);
+    if (detInv == -1) {
+        cout << "Matrix is not invertible under mod 26\n";
+        return false;
+    }
+    // Adjugate matrix
+    result[0][0] = A[1][1] * detInv % 26;
+    result[0][1] = (-A[0][1] * detInv % 26 + 26) % 26;
+    result[1][0] = (-A[1][0] * detInv % 26 + 26) % 26;
+    result[1][1] = A[0][0] * detInv % 26;
+    return true;
+}
+
+
+int modInverse(int a) {
+    a = a % 26;
+    for (int x = 1; x < 26; x++) {
+        if ((a * x) % 26 == 1)
+            return x;
+    }
+    return -1; // No modular inverse exists
+}
+
+// Function to find the inverse of a 2x2 matrix in mod 26
+bool inverseMatrix(int A[2][2], int result[2][2]) {
+    int det = (A[0][0] * A[1][1] - A[0][1] * A[1][0]) % 26;
+    if (det < 0) det += 26;
+    int detInv = modInverse(det);
+    if (detInv == -1) {
+        cout << "Matrix is not invertible under mod 26\n";
+        return false;
+    }
+    // Adjugate matrix
+    result[0][0] = A[1][1] * detInv % 26;
+    result[0][1] = (-A[0][1] * detInv % 26 + 26) % 26;
+    result[1][0] = (-A[1][0] * detInv % 26 + 26) % 26;
+    result[1][1] = A[0][0] * detInv % 26;
+    return true;
+}
 
 // Generate random matrix key
 int generateKeyMatrix(int keyMatrix[2][2]) {
