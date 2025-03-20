@@ -1,3 +1,5 @@
+#include <iostream>
+
 vector<vector<int>> generateKeyMatrix() {
     int a, b, c, d, det;
     while (true) {
