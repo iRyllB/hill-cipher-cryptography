@@ -3,7 +3,7 @@
 #include <vector>
 #include <sstream>
 #include <ctime>
-#include <cstdlib> // Ensure this is included!
+#include <cstdlib> 
 
 using namespace std;
 
@@ -16,6 +16,9 @@ int gcd(int a, int b) {
     }
     return a;
 }
+/* MOD 26 NI SIYA KAY A-Z BIYA ATO ENCRYPTION AND DECRYPTION, SO A-Z IS 26 KA LETTERS, mag ensure ni
+na ange values nato is dili mo lapas og 26. if natingala mo nganong 26 == 1 siya and -1 if walay inverse 
+na instead of 0, sa mau gi tudlo ni maam. This is because  ga exist ra ang inverse if coprime siya sa 26 */
 
 // Function to find modular inverse of a number under mod 26
 int modInverse(int a) {
@@ -58,7 +61,7 @@ void generateKeyMatrix(int keyMatrix[2][2]) {
         d = rand() % 9 + 1;
         det = (a * d - b * c) % 26;
         if (det < 0) det += 26;
-    } while (gcd(det, 26) != 1);  // Ensure matrix is invertible
+    } while (gcd(det, 26) != 1);  // Ensure matrix is invertible DILI SIYA !=0 since mod 26 atoa lagi gi gamit,
 
     keyMatrix[0][0] = a;
     keyMatrix[0][1] = b;
@@ -85,7 +88,7 @@ vector<vector<int>> multiplyMatrix(const vector<vector<int>>& messageMatrix, int
     return result;
 }
 
-// Function to convert text into a matrix
+// Function to convert text into a matrix (NEED NATO E CONVERT ANG TEXT INTO A MATRIX OR VECTOR PARA MA CALCULATE NATOG TARONG)
 vector<vector<int>> textToMatrix(const string& text) {
     vector<vector<int>> matrix;
     vector<int> row;
@@ -104,7 +107,7 @@ vector<vector<int>> textToMatrix(const string& text) {
     return matrix;
 }
 
-// Function to convert matrix to string
+// Function to convert matrix to string (NEED NI SIYA PARA MA PRINT OU NATOG TARONG)
 string matrixToString(const vector<vector<int>>& matrix) {
     stringstream ss;
     for (const auto& row : matrix) {
@@ -122,6 +125,7 @@ void encrypt() {
     cin.ignore();
     getline(cin, message);
 
+    //GIPANG CALL OUT LANG ANG MGA FUNCTIONS
     generateKeyMatrix(keyMatrix);
     vector<vector<int>> messageMatrix = textToMatrix(message);
     vector<vector<int>> encryptedMatrix = multiplyMatrix(messageMatrix, keyMatrix);
@@ -136,7 +140,7 @@ void decrypt() {
     string encryptedMessage;
     int keyMatrix[2][2], inverseKeyMatrix[2][2];
 
-    cin.ignore(); // Fix input issue
+    cin.ignore(); // Fix input issue (para dili na mag space before mag input)
 
     cout << "\nEnter encrypted message (space-separated numbers): ";
     getline(cin, encryptedMessage);
@@ -145,6 +149,7 @@ void decrypt() {
     string keyInput;
     cin >> keyInput;
 
+    //gina convert nato atong 4 digit key into matrix, aron mahimo siyag 2x2 matrix.
     if (keyInput.length() != 4 || !isdigit(keyInput[0]) || !isdigit(keyInput[1]) || !isdigit(keyInput[2]) || !isdigit(keyInput[3])) {
         cout << "Invalid key! Enter a 4-digit key.\n";
         return;
