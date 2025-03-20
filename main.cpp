@@ -1,11 +1,13 @@
 #include <iostream>
 #include <string>
-#include <ctime>
 #include <vector>
+#include <sstream>
+#include <ctime>
+#include <cstdlib> // Ensure this is included!
 
 using namespace std;
 
-// GCD calculator (Greatest Common Divisor)
+// Function to calculate GCD (Greatest Common Divisor)
 int gcd(int a, int b) {
     while (b != 0) {
         int temp = b;
@@ -15,6 +17,7 @@ int gcd(int a, int b) {
     return a;
 }
 
+// Function to find modular inverse of a number under mod 26
 int modInverse(int a) {
     a = a % 26;
     for (int x = 1; x < 26; x++) {
@@ -24,16 +27,17 @@ int modInverse(int a) {
     return -1; // No modular inverse exists
 }
 
-
 // Function to find the inverse of a 2x2 matrix in mod 26
 bool inverseMatrix(int A[2][2], int result[2][2]) {
     int det = (A[0][0] * A[1][1] - A[0][1] * A[1][0]) % 26;
     if (det < 0) det += 26;
+
     int detInv = modInverse(det);
     if (detInv == -1) {
-        cout << "Matrix is not invertible under mod 26\n";
+        cout << "Matrix is not invertible under mod 26.\n";
         return false;
     }
+
     // Adjugate matrix
     result[0][0] = (A[1][1] * detInv) % 26;
     result[0][1] = (-A[0][1] * detInv % 26 + 26) % 26;
@@ -42,10 +46,9 @@ bool inverseMatrix(int A[2][2], int result[2][2]) {
     return true;
 }
 
-
-// Generate random matrix key
-int generateKeyMatrix(int keyMatrix[2][2]) {
-    srand(static_cast<unsigned int>(time(0)));
+// Function to generate a random 2x2 key matrix
+void generateKeyMatrix(int keyMatrix[2][2]) {
+    srand(time(0)); // Seed random number generator
     int a, b, c, d, det;
 
     do {
@@ -53,9 +56,9 @@ int generateKeyMatrix(int keyMatrix[2][2]) {
         b = rand() % 9 + 1;
         c = rand() % 9 + 1;
         d = rand() % 9 + 1;
-        det = (a * d - b * c);
+        det = (a * d - b * c) % 26;
         if (det < 0) det += 26;
-    } while (gcd(det, 26) != 1);  // Check if invertible
+    } while (gcd(det, 26) != 1);  // Ensure matrix is invertible
 
     keyMatrix[0][0] = a;
     keyMatrix[0][1] = b;
@@ -63,135 +66,128 @@ int generateKeyMatrix(int keyMatrix[2][2]) {
     keyMatrix[1][1] = d;
 
     cout << "\n-----------------------------------\n";
-    cout << " Please use this key when decrypting:\n";
-    cout << " Generated Key: " << a << b << c << d << endl;
+    cout << " Use this key for decryption:\n";
+    cout << " Key: " << a << b << c << d << endl;
     cout << "-----------------------------------\n";
-
-    return det;
 }
 
-// Multiplication for matrix (1x2) * (2x2) → (1x2)
-vector<vector<int>> multiplication(const vector<vector<int>>& messageMatrix, int keyMatrix[2][2]) {
-    vector<vector<int>> encryptedMatrix;
-
+// Function to multiply a 1x2 matrix with a 2x2 matrix
+vector<vector<int>> multiplyMatrix(const vector<vector<int>>& messageMatrix, int keyMatrix[2][2]) {
+    vector<vector<int>> result;
     for (const auto& row : messageMatrix) {
-        vector<int> encryptedRow(2, 0);
-
-        // Matrix multiplication: [P1 P2] * [k00 k01]
-        //                                    [k10 k11]
-        encryptedRow[0] = (row[0] * keyMatrix[0][0] + row[1] * keyMatrix[0][1]) % 26;
-        encryptedRow[1] = (row[0] * keyMatrix[1][0] + row[1] * keyMatrix[1][1]) % 26;
-
-        // Ensure non-negative values
-        if (encryptedRow[0] < 0) encryptedRow[0] += 26;
-        if (encryptedRow[1] < 0) encryptedRow[1] += 26;
-
-        encryptedMatrix.push_back(encryptedRow);
+        vector<int> newRow(2, 0);
+        newRow[0] = (row[0] * keyMatrix[0][0] + row[1] * keyMatrix[0][1]) % 26;
+        newRow[1] = (row[0] * keyMatrix[1][0] + row[1] * keyMatrix[1][1]) % 26;
+        if (newRow[0] < 0) newRow[0] += 26;
+        if (newRow[1] < 0) newRow[1] += 26;
+        result.push_back(newRow);
     }
-
-    return encryptedMatrix;
+    return result;
 }
 
-// Function to convert encrypted matrix to a string for display
-string matrixToString(const vector<vector<int>>& encryptedMatrix) {
-    string encrypted_message = "";
-    for (const auto& row : encryptedMatrix) {
-        encrypted_message += to_string(row[0]) + " " + to_string(row[1]) + " ";
-    }
-    return encrypted_message;
-}
-
-// Convert message into a 1x2 matrix format
-vector<vector<int>> convertToMatrix(const string& message) {
+// Function to convert text into a matrix
+vector<vector<int>> textToMatrix(const string& text) {
     vector<vector<int>> matrix;
     vector<int> row;
-
-    for (char c : message) {
-        if (c == ' ') {
-            row.push_back(0);
-        } else if (isalpha(c)) {
-            row.push_back(toupper(c) - 'A' + 1);
-        }
-
+    for (char c : text) {
+        if (c == ' ') row.push_back(0);
+        else if (isalpha(c)) row.push_back(toupper(c) - 'A' + 1);
         if (row.size() == 2) {
             matrix.push_back(row);
             row.clear();
         }
     }
-
-    // If the last pair is incomplete, pad with 0
     if (!row.empty()) {
         row.push_back(0);
         matrix.push_back(row);
     }
-
     return matrix;
 }
 
-// Encryption function
-string encrypt() {
+// Function to convert matrix to string
+string matrixToString(const vector<vector<int>>& matrix) {
+    stringstream ss;
+    for (const auto& row : matrix) {
+        ss << row[0] << " " << row[1] << " ";
+    }
+    return ss.str();
+}
+
+// Function to encrypt a message
+void encrypt() {
     string message;
     int keyMatrix[2][2];
 
-    cout << "\nEnter a message to encrypt: ";
+    cout << "\nEnter message to encrypt: ";
+    cin.ignore();
     getline(cin, message);
 
-    generateKeyMatrix(keyMatrix);  // Generate key matrix
-
-    // Convert message to 1x2 matrix
-    vector<vector<int>> messageMatrix = convertToMatrix(message);
-
-    // Encrypt using matrix multiplication
-    vector<vector<int>> encryptedMatrix = multiplication(messageMatrix, keyMatrix);
-
-    // Convert encrypted matrix to string
-    string encrypted_output = matrixToString(encryptedMatrix);
+    generateKeyMatrix(keyMatrix);
+    vector<vector<int>> messageMatrix = textToMatrix(message);
+    vector<vector<int>> encryptedMatrix = multiplyMatrix(messageMatrix, keyMatrix);
 
     cout << "\n-----------------------------------\n";
-    cout << "Encrypted Message: " << encrypted_output << endl;
+    cout << "Encrypted Message: " << matrixToString(encryptedMatrix) << endl;
     cout << "-----------------------------------\n";
-
-    return encrypted_output;
 }
 
-
-// Placeholder function for decryption
-string decrypt() {
-    string encrypted_message;
+// Function to decrypt a message
+void decrypt() {
+    string encryptedMessage;
     int keyMatrix[2][2], inverseKeyMatrix[2][2];
 
-    cout << "\n Enter the encrypted message (space-separated numbers): ";
-    cin.ignore();
-    getline(cin, encrypted_message);
+    cin.ignore(); // Fix input issue
 
-    cout << "\n Enter the 4-digit key to decrypt: ";
+    cout << "\nEnter encrypted message (space-separated numbers): ";
+    getline(cin, encryptedMessage);
+
+    cout << "\nEnter the 4-digit key: ";
     string keyInput;
     cin >> keyInput;
 
-    // Convert keyInput into keyMatrix
-    if (keyInput.length() != 4) {
-        cout << "Invalid key format! Please enter a 4-digit key.\n";
-        return "";
+    if (keyInput.length() != 4 || !isdigit(keyInput[0]) || !isdigit(keyInput[1]) || !isdigit(keyInput[2]) || !isdigit(keyInput[3])) {
+        cout << "Invalid key! Enter a 4-digit key.\n";
+        return;
     }
 
+    // Convert key string to key matrix
     keyMatrix[0][0] = keyInput[0] - '0';
     keyMatrix[0][1] = keyInput[1] - '0';
     keyMatrix[1][0] = keyInput[2] - '0';
     keyMatrix[1][1] = keyInput[3] - '0';
 
-    // Find inverse matrix
-    if (!inverseMatrix(keyMatrix, inverseKeyMatrix)) {
-        return "";
+    if (!inverseMatrix(keyMatrix, inverseKeyMatrix)) return;
+
+    vector<vector<int>> encryptedMatrix;
+    stringstream ss(encryptedMessage);
+    vector<int> row;
+    int num;
+
+    while (ss >> num) {
+        row.push_back(num);
+        if (row.size() == 2) {
+            encryptedMatrix.push_back(row);
+            row.clear();
+        }
     }
-    return 0;
+
+    vector<vector<int>> decryptedMatrix = multiplyMatrix(encryptedMatrix, inverseKeyMatrix);
+    string decryptedMessage;
+
+    for (const auto& row : decryptedMatrix) {
+        for (int val : row) {
+            decryptedMessage += (val == 0) ? ' ' : (val - 1 + 'A');
+        }
+    }
+
+    cout << "\n-----------------------------------\n";
+    cout << "Decrypted Message: " << decryptedMessage << endl;
+    cout << "-----------------------------------\n";
 }
-
-
 
 // Main menu system
 int main() {
     int choice;
-
     do {
         cout << "\n===================================\n";
         cout << "      Matrix Encryption System     \n";
@@ -200,22 +196,20 @@ int main() {
         cout << " 2. Decrypt Message\n";
         cout << " 3. Exit\n";
         cout << "-----------------------------------\n";
-        cout << " Enter your choice: ";
+        cout << "Enter your choice: ";
 
         if (!(cin >> choice)) {
             cin.clear();
             cin.ignore(1000, '\n');
-            cout << "\n Invalid input! Please enter a number.\n";
+            cout << "\nInvalid input! Enter a number.\n";
             continue;
         }
-
-        cin.ignore();
 
         switch (choice) {
             case 1: encrypt(); break;
             case 2: decrypt(); break;
-            case 3: cout << "\n Exiting program...\n"; break;
-            default: cout << "\n Invalid choice! Please enter a valid option.\n";
+            case 3: cout << "\nExiting program...\n"; break;
+            default: cout << "\nInvalid choice! Try again.\n";
         }
     } while (choice != 3);
 
