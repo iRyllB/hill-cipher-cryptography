@@ -3,7 +3,7 @@
 #include <ctime>
 #include <vector>
 #include <sstream>
-
+// kani
 using namespace std;
 
 // GCD calculator (Greatest Common Divisor)
