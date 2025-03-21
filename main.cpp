@@ -51,7 +51,7 @@ bool inverseMatrix(int A[2][2], int result[2][2]) {
 
 // Function to generate a random 2x2 key matrix
 void generateKeyMatrix(int keyMatrix[2][2]) {
-    srand(time(0)); // Seed random number generator
+    srand(time(0)); 
     int a, b, c, d, det;
 
     do {
@@ -125,7 +125,13 @@ void encrypt() {
     cin.ignore();
     getline(cin, message);
 
-    //GIPANG CALL OUT LANG ANG MGA FUNCTIONS
+    for (char c : message) {
+        if (!isalpha(c) && c != ' ') {
+            cout << "Invalid input! Only letters and spaces are allowed.\n";
+            return;
+        }
+    }
+
     generateKeyMatrix(keyMatrix);
     vector<vector<int>> messageMatrix = textToMatrix(message);
     vector<vector<int>> encryptedMatrix = multiplyMatrix(messageMatrix, keyMatrix);
@@ -134,6 +140,7 @@ void encrypt() {
     cout << "Encrypted Message: " << matrixToString(encryptedMatrix) << endl;
     cout << "-----------------------------------\n";
 }
+
 
 // Function to decrypt a message
 void decrypt() {
@@ -145,11 +152,19 @@ void decrypt() {
     cout << "\nEnter encrypted message (space-separated numbers): ";
     getline(cin, encryptedMessage);
 
+    // Input validation: only numbers and spaces allowed
+    for (char c : encryptedMessage) {
+        if (!isdigit(c) && c != ' ') {
+            cout << "Invalid input! Encrypted message should contain only numbers and spaces.\n";
+            return;
+        }
+    }
+
     cout << "\nEnter the 4-digit key: ";
     string keyInput;
     cin >> keyInput;
 
-    //gina convert nato atong 4 digit key into matrix, aron mahimo siyag 2x2 matrix.
+    // Key validation: must be exactly 4 digits
     if (keyInput.length() != 4 || !isdigit(keyInput[0]) || !isdigit(keyInput[1]) || !isdigit(keyInput[2]) || !isdigit(keyInput[3])) {
         cout << "Invalid key! Enter a 4-digit key.\n";
         return;
@@ -189,6 +204,7 @@ void decrypt() {
     cout << "Decrypted Message: " << decryptedMessage << endl;
     cout << "-----------------------------------\n";
 }
+
 
 // Main menu system
 int main() {
